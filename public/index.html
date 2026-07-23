@@ -48,7 +48,13 @@
   .stat .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:5px;font-weight:600;}
 
   .week{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;overflow:hidden;}
-  .whead{display:flex;align-items:center;gap:12px;padding:14px 15px 13px;border-bottom:1px solid var(--line);}
+  .whead{display:flex;align-items:center;gap:12px;padding:14px 15px 13px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+  .whead:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+  .chev{flex:none;width:20px;height:20px;color:var(--muted);transition:transform .2s ease;}
+  .chev svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+  .week.collapsed .whead{border-bottom-color:transparent;}
+  .week.collapsed .chev{transform:rotate(-90deg);}
+  .week.collapsed .runs,.week.collapsed .rest{display:none;}
   .bib{font-family:'Oswald';font-weight:700;font-size:30px;line-height:.85;font-variant-numeric:tabular-nums;color:var(--ink);min-width:38px;}
   .bib small{display:block;font-size:9px;letter-spacing:.18em;font-weight:600;color:var(--muted);margin-bottom:1px;}
   .wmeta{flex:1;min-width:0;}
@@ -413,9 +419,11 @@ function strRow(w, day, sKey){
 function render(){
   const host = document.getElementById('weeks');
   host.innerHTML = '';
+  const cur = currentWeek();
   weeks.forEach(w=>{
     const card = document.createElement('section');
-    card.className = 'week';
+    const open = w.n === cur;
+    card.className = 'week' + (open ? '' : ' collapsed');
     let chip = '';
     if(w.tag){ const t = TAGS[w.tag]; chip = `<span class="chip ${t[0]}">${t[1]}</span>`; }
 
@@ -428,14 +436,26 @@ function render(){
     items.sort((a,b)=>a.o-b.o);
 
     card.innerHTML = `
-      <div class="whead">
+      <div class="whead" role="button" tabindex="0" aria-expanded="${open?'true':'false'}" aria-label="Week ${w.n} — tap to ${open?'collapse':'expand'}">
         <div class="bib"><small>WK</small>${String(w.n).padStart(2,'0')}</div>
         <div class="wmeta"><div class="wdates">${w.d}</div><div class="wmiles">${w.mi==='—'?'Race week':w.mi+' miles'}</div></div>
         ${chip}
+        <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
       </div>
       <div class="runs">${items.map(x=>x.html).join('')}</div>
       <div class="rest">${restLine(w.n)}</div>`;
     host.appendChild(card);
+  });
+
+  host.querySelectorAll('.whead').forEach(h=>{
+    const toggle = ()=>{
+      const wk = h.closest('.week');
+      const collapsed = wk.classList.toggle('collapsed');
+      h.setAttribute('aria-expanded', collapsed?'false':'true');
+      h.setAttribute('aria-label', h.getAttribute('aria-label').replace(/(collapse|expand)$/, collapsed?'expand':'collapse'));
+    };
+    h.addEventListener('click', toggle);
+    h.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
   });
 
   host.querySelectorAll('.check').forEach(btn=>{
