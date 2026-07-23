@@ -26,6 +26,7 @@
     --strtag-color:#3C4890;--strtag-bg:#E9ECF7;--str-done-bg:#EDEFF7;--str-label-done:#565E86;--done-label:#8A6E66;
     --rest-b:#565E6B;--race-bg:linear-gradient(120deg,#FDEFEA,#FBE3DC);
     --btn-bg:#EEF1F5;--btn-color:#3C4350;
+    --gp-label:#1F7A5A;--gp-border:#BFDCCF;--gp-bg:#F5FBF8;--gptag-color:#15654A;--gptag-bg:#DFF0E8;
   }
   @media (prefers-color-scheme:dark){
     :root{
@@ -38,6 +39,7 @@
       --strtag-color:#B9C0EE;--strtag-bg:#282E48;--str-done-bg:#232842;--str-label-done:#AEB6E6;--done-label:#CBAA9F;
       --rest-b:#AEB6C2;--race-bg:linear-gradient(120deg,#2E2018,#33241C);
       --btn-bg:#242B34;--btn-color:#C2CAD6;
+      --gp-label:#6FD3A8;--gp-border:#2E5A48;--gp-bg:#17241E;--gptag-color:#8FE3BE;--gptag-bg:#1E3A2E;
     }
   }
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -145,6 +147,9 @@
   .split input{width:100%;text-align:center;border:1px solid var(--line);background:var(--input-bg);border-radius:7px;padding:6px 2px;font:inherit;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink);}
   .split input::placeholder{color:var(--placeholder);}
   .split input:focus{outline:none;border-color:var(--accent);background:var(--input-focus);box-shadow:0 0 0 2px var(--tint);}
+  .split.gp > span{color:var(--gp-label);}
+  .split.gp input{border-color:var(--gp-border);background:var(--gp-bg);}
+  .gptag{display:inline-block;font-family:'Oswald';font-weight:600;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--gptag-color);background:var(--gptag-bg);border-radius:4px;padding:2px 6px;margin-left:6px;vertical-align:1px;}
   .notewrap input{width:100%;border:1px solid var(--line);background:var(--input-bg);border-radius:9px;padding:8px 11px;font:inherit;font-size:13px;color:var(--ink);}
   .notewrap input::placeholder{color:var(--placeholder);}
   .notewrap input:focus{outline:none;border-color:var(--accent);background:var(--input-focus);box-shadow:0 0 0 3px var(--tint);}
@@ -185,11 +190,11 @@
     <div class="count"><span class="num" id="countNum">–</span><span class="unit" id="countUnit">to go</span></div>
     <div class="raceline" id="raceLine">Race day · <b>Sat, Sep 26</b></div>
     <div class="bar"><i id="barFill"></i></div>
-    <div class="barlabel"><span id="barText">0 of 52 runs done</span><span id="barPct">0%</span></div>
+    <div class="barlabel"><span id="barText">0 of 60 runs done</span><span id="barPct">0%</span></div>
   </header>
 
   <div class="stats">
-    <div class="stat"><div class="v" id="stRuns">0<small>/52</small></div><div class="k">Runs</div></div>
+    <div class="stat"><div class="v" id="stRuns">0<small>/60</small></div><div class="k">Runs</div></div>
     <div class="stat"><div class="v" id="stMiles">0<small> mi</small></div><div class="k">Logged</div></div>
     <div class="stat"><div class="v" id="stWeek">1<small>/13</small></div><div class="k">Week</div></div>
   </div>
@@ -282,6 +287,9 @@
 </script>
 <script>
 const RACE = new Date(2026,8,26);
+// Data lives in Firestore keyed by run id (w{week}r{index}); this key is retained
+// only as the plan/version marker — the run-id scheme is the real data invariant.
+const KEY = 'halflog-v1';
 const MON0 = new Date(2026,5,29);
 const DOFF = {MON:0,TUE:1,WED:2,THU:3,FRI:4,SAT:5,SUN:6};
 const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -292,6 +300,9 @@ function dateFor(weekN, day){
 }
 function splitCount(r){ return Math.max(1, Math.round(r.mi)); }
 
+// gp = number of closing miles at goal race pace (9:45–10:00).
+// WEEKS 1–4 ARE FROZEN: same runs, same MON/TUE/WED/FRI order, so run ids
+// w1r0…w4r3 keep the user's logged data attached. Do not renumber/reorder them.
 const weeks = [
   {n:1, d:'Jun 29 – Jul 5', tag:null, mi:'13', runs:[
     {day:'MON',l:'3 mi easy + 4 strides',mi:3,t:'strides'},{day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
@@ -304,34 +315,62 @@ const weeks = [
     {day:'WED',l:'4 mi easy',mi:4,t:'easy'},{day:'FRI',l:'6 mi long run',mi:6,long:1,t:'long'}]},
   {n:4, d:'Jul 20 – 26', tag:'cut', mi:'14', runs:[
     {day:'MON',l:'3 mi easy + strides',mi:3,t:'strides'},{day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
-    {day:'WED',l:'3 mi easy',mi:3,t:'easy'},{day:'FRI',l:'5 mi long run',mi:5,long:1,t:'long'}]},
-  {n:5, d:'Jul 27 – Aug 2', tag:null, mi:'16', runs:[
-    {day:'MON',l:'2 mi tempo @ 9:15–9:30',mi:4,t:'tempo',work:'2 mi'},{day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
-    {day:'WED',l:'4 mi easy',mi:4,t:'easy'},{day:'FRI',l:'7 mi long run',mi:7,long:1,t:'long'}]},
-  {n:6, d:'Aug 3 – 9', tag:null, mi:'19', runs:[
-    {day:'MON',l:'5 × 400m @ ~9:00',mi:5,t:'intervals',reps:5},{day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
-    {day:'WED',l:'4 mi easy',mi:4,t:'easy'},{day:'FRI',l:'8 mi long run',mi:8,long:1,t:'long'}]},
-  {n:7, d:'Aug 10 – 16', tag:'cut', mi:'14', runs:[
-    {day:'MON',l:'2 mi tempo',mi:4,t:'tempo',work:'2 mi'},{day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
-    {day:'WED',l:'3 mi easy',mi:3,t:'easy'},{day:'FRI',l:'6 mi long run',mi:6,long:1,t:'long'}]},
-  {n:8, d:'Aug 17 – 23', tag:null, mi:'20', runs:[
-    {day:'MON',l:'3 mi tempo @ 9:15–9:30',mi:5,t:'tempo',work:'3 mi'},{day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
-    {day:'WED',l:'4 mi (last 2 @ goal pace)',mi:4,t:'goalfinish'},{day:'FRI',l:'9 mi long run',mi:9,long:1,t:'long'}]},
-  {n:9, d:'Aug 24 – 30', tag:null, mi:'23', runs:[
-    {day:'MON',l:'6 × 400m or 4 mi tempo',mi:5,t:'int_or_tempo',reps:6},{day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
-    {day:'WED',l:'5 mi easy',mi:5,t:'easy'},{day:'FRI',l:'10 mi long run',mi:10,long:1,t:'long'}]},
-  {n:10, d:'Aug 31 – Sep 6', tag:'cut', mi:'17', runs:[
-    {day:'MON',l:'2 mi tempo',mi:4,t:'tempo',work:'2 mi'},{day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
-    {day:'WED',l:'3 mi easy',mi:3,t:'easy'},{day:'FRI',l:'8 mi long run',mi:8,long:1,t:'long'}]},
-  {n:11, d:'Sep 7 – 13', tag:'peak', mi:'23–24', runs:[
-    {day:'MON',l:'3 mi @ goal pace',mi:4,t:'goal',work:'3 mi'},{day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
-    {day:'WED',l:'5 mi easy',mi:5,t:'easy'},{day:'FRI',l:'11–12 mi long run',mi:11,long:1,t:'long'}]},
-  {n:12, d:'Sep 14 – 20', tag:'taper', mi:'18', runs:[
-    {day:'MON',l:'3 mi w/ 2 mi tempo',mi:4,t:'tempoembed'},{day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
-    {day:'WED',l:'4 mi easy',mi:4,t:'easy'},{day:'FRI',l:'8 mi long run',mi:8,long:1,t:'long'}]},
+    {day:'WED',l:'3 mi easy',mi:3,t:'easy'},{day:'FRI',l:'5 mi long',mi:5,long:1,t:'long',gp:1}]},
+
+  /* ===== WEEKS 5–13: REVISED for late-race durability ===== */
+  {n:5, d:'Jul 27 – Aug 2', tag:null, mi:'20', note:'5th day in — Saturdays start', runs:[
+    {day:'MON',l:'2 mi tempo @ 9:15–9:30',mi:4,t:'tempo',work:'2 mi'},
+    {day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
+    {day:'WED',l:'3 mi easy',mi:3,t:'easy'},
+    {day:'FRI',l:'7 mi long',mi:7,long:1,t:'long',gp:1},
+    {day:'SAT',l:'3 mi easy',mi:3,t:'easy'}]},
+  {n:6, d:'Aug 3 – 9', tag:null, mi:'23', runs:[
+    {day:'MON',l:'Hill repeats — 6 × 60–90 sec',mi:5,t:'hills',reps:6},
+    {day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
+    {day:'WED',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'FRI',l:'8 mi long',mi:8,long:1,t:'long',gp:2},
+    {day:'SAT',l:'3 mi easy',mi:3,t:'easy'}]},
+  {n:7, d:'Aug 10 – 16', tag:null, mi:'25', runs:[
+    {day:'MON',l:'3 mi tempo @ 9:15–9:30',mi:5,t:'tempo',work:'3 mi'},
+    {day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'WED',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'FRI',l:'9 mi long',mi:9,long:1,t:'long',gp:2},
+    {day:'SAT',l:'3 mi easy',mi:3,t:'easy'}]},
+  {n:8, d:'Aug 17 – 23', tag:'cut', mi:'20', runs:[
+    {day:'MON',l:'2 mi tempo',mi:4,t:'tempo',work:'2 mi'},
+    {day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
+    {day:'WED',l:'3 mi easy',mi:3,t:'easy'},
+    {day:'FRI',l:'7 mi long',mi:7,long:1,t:'long',gp:2},
+    {day:'SAT',l:'3 mi easy',mi:3,t:'easy'}]},
+  {n:9, d:'Aug 24 – 30', tag:null, mi:'26', runs:[
+    {day:'MON',l:'Hill repeats — 8 × 60–90 sec',mi:5,t:'hills',reps:8},
+    {day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'WED',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'FRI',l:'10 mi long',mi:10,long:1,t:'long',gp:3},
+    {day:'SAT',l:'3 mi easy',mi:3,t:'easy'}]},
+  {n:10, d:'Aug 31 – Sep 6', tag:null, mi:'28', runs:[
+    {day:'MON',l:'3 mi @ goal pace',mi:5,t:'goal',work:'3 mi'},
+    {day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'WED',l:'5 mi easy',mi:5,t:'easy'},
+    {day:'FRI',l:'11 mi long',mi:11,long:1,t:'long',gp:3},
+    {day:'SAT',l:'3 mi easy',mi:3,t:'easy'}]},
+  {n:11, d:'Sep 7 – 13', tag:'peak', mi:'27–28', note:'Friday is your race rehearsal', runs:[
+    {day:'MON',l:'2 mi tempo',mi:4,t:'tempo',work:'2 mi'},
+    {day:'TUE',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'WED',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'FRI',l:'12–13 mi long — race sim',mi:12,long:1,t:'long',gp:3,sim:1},
+    {day:'SAT',l:'3 mi easy',mi:3,t:'easy'}]},
+  {n:12, d:'Sep 14 – 20', tag:'taper', mi:'22', runs:[
+    {day:'MON',l:'2 mi tempo',mi:4,t:'tempo',work:'2 mi'},
+    {day:'TUE',l:'3 mi easy',mi:3,t:'easy'},
+    {day:'WED',l:'4 mi easy',mi:4,t:'easy'},
+    {day:'FRI',l:'8 mi long',mi:8,long:1,t:'long',gp:2},
+    {day:'SAT',l:'3 mi easy',mi:3,t:'easy'}]},
   {n:13, d:'Sep 21 – 27', tag:'race', mi:'—', runs:[
-    {day:'MON',l:'3 mi easy + strides',mi:3,t:'strides'},{day:'TUE',l:'2 mi easy',mi:2,t:'easy'},
-    {day:'FRI',l:'2 mi shakeout jog',mi:2,t:'shakeout'},{day:'SAT',l:'RACE — 13.1 miles',mi:13.1,race:1,t:'race'}]},
+    {day:'MON',l:'3 mi easy + strides',mi:3,t:'strides'},
+    {day:'TUE',l:'2 mi easy',mi:2,t:'easy'},
+    {day:'FRI',l:'2 mi shakeout jog',mi:2,t:'shakeout'},
+    {day:'SAT',l:'RACE — 13.1 miles',mi:13.1,race:1,t:'race'}]},
 ];
 
 const TAGS = {cut:['cut','Cutback'],peak:['peak','Peak'],taper:['taper','Taper'],race:['race','Race week']};
@@ -349,17 +388,20 @@ const SESSIONS = {
 
 function detailFor(r){
   switch(r.t){
-    case 'easy': return `Easy, conversational running at <b>11:00–11:45/mi</b> — you should be able to hold a full conversation the whole way. This builds your aerobic base and helps you recover from the hard days. Keeping it genuinely easy is what makes the fast days work, and at your size it's also what spares your joints the most — if you're unsure, go slower.`;
-    case 'strides': return `Run the bulk easy at <b>11:00–11:45/mi</b>, then finish with <b>4 strides</b>: smooth ~20-second pickups building to about 5K effort (quick, not an all-out sprint), with a full walk or jog to recover between each. Strides sharpen your turnover and form without adding fatigue. Do them on flat ground.`;
-    case 'intervals': return `<b>Warm up</b> 1 mi easy. Then <b>${r.reps} × 400m</b> (one track lap, or about ¼ mi) at roughly <b>9:00/mi</b> or a touch faster — hard but controlled and repeatable, not a sprint. <b>Jog 200m</b> (~90 sec) easy between each. <b>Cool down</b> 1 mi easy. Aim for even splits across every rep; if the last one is a survival sprint, you went out too fast.`;
-    case 'int_or_tempo': return `Two ways to run this — pick what suits the day. <b>Option A (intervals):</b> warm up 1 mi easy, then ${r.reps} × 400m at ~9:00/mi with a 200m jog between, then 1 mi easy cool-down. <b>Option B (tempo):</b> 1 mi warm-up, 4 mi at tempo pace (9:15–9:30/mi), 1 mi cool-down. Both build the same engine.`;
-    case 'tempo': return `<b>Warm up</b> ~1 mi easy. Then run <b>${r.work} at tempo pace, 9:15–9:30/mi</b> — "comfortably hard," the effort you could just hold for about an hour. Breathing with purpose, but not gasping. <b>Cool down</b> ~1 mi easy. Tempo runs lift the pace you can sustain, which is exactly what pulls you under 10:00 on race day.`;
-    case 'tempoembed': return `3 miles total: about <b>½ mi easy</b> to warm up, <b>2 mi at tempo pace (9:15–9:30/mi)</b>, then <b>½ mi easy</b> to cool down. A short, sharp effort that keeps your legs honest during the taper without tiring you out.`;
-    case 'goal': return `<b>Warm up</b> ~1 mi easy, then settle into <b>${r.work} at goal race pace, 9:45–10:00/mi</b>. This is your dress rehearsal — lock in what race effort feels like so it's automatic on the day. <b>Cool down</b> easy. It should feel controlled, not strained.`;
-    case 'goalfinish': return `Run the <b>first 2 miles easy</b> (11:00–11:45/mi), then pick it up to <b>goal pace (9:45–10:00/mi) for the last 2 miles</b>. Practicing a faster finish on slightly tired legs trains you to hold pace late in the race, when it matters most.`;
-    case 'long': { let s = `Your most important run of the week. Keep it <b>easy and conversational — 11:00–11:30/mi</b>, deliberately slower than goal pace. The goal is time on your feet and endurance, not speed. Start slower than feels necessary and pick it up late only if you feel strong. Walk breaks are fine.`; if(r.mi>=8){ s += ` <b>Dress rehearsal</b> for race day — practice your pacing, hydration, and fueling exactly as you plan to race.`; } return s; }
-    case 'shakeout': return `A short, very easy 2 miles just to keep your legs loose — relaxed and conversational, no faster than easy pace. Toss in a couple of short strides if you feel stiff. The training is already done; this only keeps you fresh. Hydrate and rest up.`;
-    case 'race': return `<b>Race day — 13.1 miles.</b> Start the first 2–3 miles slightly slower than goal (<b>10:15–10:30</b>) — it'll feel too easy, which is exactly right. Settle into <b>9:45–10:00</b> through the middle, and if you've got more in the last 5K, spend it. Going out too fast is the #1 way to fade — trust your training and run your race.`;
+    case 'easy': return `Easy, conversational running at <b>11:00–11:30/mi</b> — full sentences the whole way. This is aerobic base and recovery, and it's what lets the hard days land. Running these too fast is the classic way to show up half-cooked to the sessions that matter. If in doubt, slower.`;
+    case 'strides': return `Run the miles easy at <b>11:00–11:30/mi</b>, then finish with <b>4 strides</b>: ~20-second pickups building smoothly to about 90–95% of top speed, then easing down, with a full <b>30–60 sec walk or jog</b> between each. Fast and relaxed, not straining. Do them at the end, on flat ground.`;
+    case 'intervals': return `<b>Warm up</b> 1 mi easy. Then <b>${r.reps} × 400m</b> (one track lap, ~¼ mi) at roughly <b>9:00/mi</b> — hard but controlled and repeatable, not a sprint. <b>Jog 200m</b> (~90 sec) between each. <b>Cool down</b> 1 mi easy. Aim for even splits; if the last rep is a survival sprint, you went out too fast.`;
+    case 'tempo': return `<b>Warm up</b> ~1 mi easy. Then <b>${r.work} at tempo pace, 9:15–9:30/mi</b> — comfortably hard, the effort you could just hold for an hour. <b>Cool down</b> ~1 mi easy. Tempo work raises the ceiling your goal pace sits under, so 9:55 starts to feel like cruising instead of pressing.`;
+    case 'hills': return `The Carrollton course climbs late — miles 11, 12 and 13 all gain elevation, plus a wall around mile 8. That's exactly where you've faded every year, so we train it directly.<br><br><b>Warm up</b> 1 mi easy. Find a moderate grade (not a wall). Run <b>${r.reps} × 60–90 sec uphill</b> at hard-but-controlled effort — tall posture, short quick steps, driving with your glutes. <b>Walk or jog back down</b> for full recovery. <b>Cool down</b> 1 mi easy. Effort matters more than pace here; ignore the watch on the climb.`;
+    case 'goal': return `<b>Warm up</b> ~1 mi easy, then run <b>${r.work} at goal race pace, 9:45–10:00/mi</b>, then <b>cool down</b> easy. Pure rehearsal — you're teaching your legs (and your pacing discipline) what 9:55 feels like, so you don't drift to 9:30 on race morning. Should feel controlled, not hard.`;
+    case 'long': {
+      const base = r.mi - (r.gp||0);
+      if(r.sim) return `<b>Race rehearsal — the single most important run of this plan.</b> Run <b>${base} miles easy at 10:45–11:15</b>, then close with <b>3 miles at goal pace, 9:45–10:00</b>. Those last three miles land at exactly the point in the race where you've faded every year — that's the whole idea. Practise your race breakfast, hydration, gels and shoes. Rolling terrain if you can. Finishing this is the strongest evidence you'll get that sub-10 is on.`;
+      if(r.gp) return `Run <b>${base} miles easy at 10:45–11:15</b>, then close with <b>${r.gp} mile${r.gp>1?'s':''} at goal pace, 9:45–10:00</b>. Picking the pace up on already-tired legs is the specific adaptation you need — it's what turns a mile-11 fade into a mile-11 hold. Don't start the pickup early; the fatigue is the point. Rolling terrain when you can.`;
+      return `Easy and conversational at <b>10:45–11:15/mi</b>, deliberately slower than goal pace. Time on your feet, not speed. Start slower than feels necessary. Walk breaks are fine; rolling terrain is a bonus.`;
+    }
+    case 'shakeout': return `2 very easy miles just to keep the legs loose — relaxed, no faster than easy pace, a couple of short strides if you feel stiff. The work is done. Nothing today makes you fitter; plenty could make you tired. Hydrate, eat well, get off your feet.`;
+    case 'race': return `<b>Race day — 13.1 miles. Target 2:10:30.</b><br><br><b>Miles 1–3: 10:00–10:10.</b> This is the discipline that wins it. In 2025 you ran 9:31 and 9:29 here — ~30 sec/mi faster than goal — and repaid it with interest at mile 11. It will feel too easy. Let people go.<br><br><b>Miles 4–10: 9:50–10:00.</b> Settle in. You've held this range for 10 miles before, so this part is proven. Take the mile-8 climb on effort, not pace.<br><br><b>Miles 11–13: hold 10:00–10:15.</b> This is the race. The climbs come back here. Shorten your stride, lift your cadence, hold form. You don't need a fast finish — you need to not lose 2:30/mi. Your final 0.1 has been 9:41–10:19 every year, so the legs are there.`;
     default: return '';
   }
 }
@@ -367,27 +409,27 @@ function detailFor(r){
 function fuelFor(r){
   const t=r.t, mi=r.mi;
   if(t==='race') return {
-    b:`Eat a familiar carb breakfast 2.5–3 hr before — the same one you rehearsed on long runs (oatmeal, or toast + banana + honey). Hydrate that morning with water + electrolytes, sipping up to ~30 min before the start. Nothing new on race day.`,
-    d:`Water with electrolytes at the aid stations, plus a gel around 45 min in, then every ~30–45 min. At your size you lose more fluid and sodium, so drink on a plan — don't wait until you're thirsty or empty.`,
-    a:`Rehydrate with water + electrolytes and eat a real carb-and-protein meal once you can. You earned it.`};
-  if(t==='shakeout') return {b:`A light snack only if you're hungry. Have some water + electrolytes beforehand.`, d:`A few sips of water; add electrolytes if it's warm.`};
+    b:`Familiar carb breakfast 2.5–3 hr before — the exact one you rehearsed on long runs. Water + electrolytes through the morning, sipping to ~30 min before the gun. Nothing new today.`,
+    d:`<b>Fuel earlier than feels necessary.</b> Your fade hits around mile 11 — roughly 1:50 in, which is classic "ran out of fuel" timing. Gel at <b>~40 min</b>, again at <b>~1:20</b>, again at <b>~1:50</b>, so you're topped up <i>before</i> the last 5K instead of chasing it. Electrolyte drink at the aid stations, on a plan, not by thirst.`,
+    a:`Rehydrate with water + electrolytes and eat a real carb-and-protein meal when you can stomach it.`};
+  if(t==='shakeout') return {b:`Light snack only if you're hungry. Water + electrolytes through the day.`, d:`A few sips of water.`};
   if(t==='long'){
     if(mi>=8) return {
-      b:`Race-day rehearsal: carb breakfast ~1.5–2 hr before (oatmeal, or toast + banana + honey, lower in fat and fiber). Hydrate well that morning with water + electrolytes so you start fully topped up.`,
-      d:`Carry <b>water with electrolytes, not plain water</b> — at your size you sweat out more fluid and sodium in the summer heat. Drink on a schedule (every ~15–20 min) rather than waiting for thirst, and take a gel or chews around 45 min in, then every ~30–45 min.`,
-      a:`Refuel within ~30–60 min: carbs + protein (chocolate milk, a smoothie, or a real meal) plus water and electrolytes. A long run this size burns a lot, so a solid recovery meal is what sets up your next week.`};
+      b:`Race rehearsal: carb breakfast ~1.5–2 hr before (oatmeal, or toast + banana + honey — low fat, low fibre). Hydrate with water + electrolytes so you start topped up.`,
+      d:`Carry <b>water with electrolytes, not plain water</b> — at 6'1" / 245 in Georgia summer you lose serious fluid and sodium. Drink every ~15–20 min on a schedule. Gels at <b>~40 min then every ~35–40 min</b> — practise the exact race timing that keeps mile 11 from falling apart.`,
+      a:`Refuel inside 30–60 min: carbs + protein plus water and electrolytes. Recovery from these is what lets the next week land.`};
     return {
-      b:`A carb breakfast ~1.5–2 hr before (oatmeal, toast + banana, or a bagel). Drink water + electrolytes that morning so you start hydrated.`,
-      d:`Carry <b>water with electrolytes</b> and sip on a schedule — you sweat more at your size, especially in the heat. A gel around the 45–60 min mark is optional but good practice.`,
-      a:`Have water + electrolytes and a carb-and-protein snack afterward to recover well.`};
+      b:`Carb breakfast ~1.5–2 hr before. Water + electrolytes that morning.`,
+      d:`Carry <b>water with electrolytes</b> and sip on a schedule. A gel around 40–45 min is good practice even at this distance.`,
+      a:`Water + electrolytes and a carb-and-protein snack afterward.`};
   }
-  if(t==='intervals'||t==='tempo'||t==='goal'||t==='goalfinish'||t==='int_or_tempo'||t==='tempoembed')
+  if(t==='tempo'||t==='goal'||t==='hills'||t==='intervals')
     return {
-      b:`Top off with a light carb snack 30–60 min before — banana, toast with honey, or half an energy bar. Drink water + a bit of electrolyte beforehand so you start hydrated; skip heavy, fatty, or high-fiber foods close to the start.`,
-      d:`Sip <b>water with electrolytes</b>, especially in the heat — you lose more fluid and sodium at your size, so stay ahead of it. No gels needed for a session this length.`};
+      b:`Light carb snack 30–60 min before — banana, toast with honey, half a bar. Hydrate beforehand; skip heavy, fatty or high-fibre food close to the start.`,
+      d:`Sip <b>water with electrolytes</b>, especially in the heat — you sweat more at your size, so stay ahead of it. No gels needed at this length.`};
   return {
-    b:`Nothing much needed for a short run, but drink water (with a pinch of electrolytes if it's hot) beforehand so you're not starting dry.`,
-    d:`Carry or sip <b>water with electrolytes</b> on warm days — at your size you sweat more, so don't wait until you're thirsty. Especially if the run goes past ~40 min.`};
+    b:`Not much needed, but drink water (plus a little electrolyte if it's hot) so you don't start dry.`,
+    d:`Carry <b>water with electrolytes</b> on warm days, especially past ~40 min.`};
 }
 
 let log = {};
@@ -443,10 +485,12 @@ function runRow(w, r, i){
   const fuel = fuelFor(r);
   const sp = st.splits||{};
   const n = splitCount(r);
+  const gpStart = r.gp ? n - r.gp : -1;   // splits from here on are the goal-pace closing miles
   let splitsHtml = '';
   for(let k=0;k<n;k++){
     const lbl = (r.race && k===n-1) ? 'Last' : (k+1);
-    splitsHtml += `<label class="split"><span>Mi ${lbl}</span><input type="text" inputmode="numeric" data-split="${id}" data-mi="${k}" value="${esc(sp[k])}" placeholder="–:––" aria-label="Mile ${k+1} pace"></label>`;
+    const gpCls = (gpStart>=0 && k>=gpStart) ? ' gp' : '';
+    splitsHtml += `<label class="split${gpCls}"><span>Mi ${lbl}</span><input type="text" inputmode="numeric" data-split="${id}" data-mi="${k}" value="${esc(sp[k])}" placeholder="–:––" aria-label="Mile ${k+1} pace"></label>`;
   }
   return `
     <div class="run${kind}${done}" data-row="${id}">
@@ -455,7 +499,7 @@ function runRow(w, r, i){
           <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
         </button>
         <span class="pill"><b>${r.day}</b><span class="pdate">${dateFor(w.n,r.day)}</span></span>
-        <span class="label">${r.l}</span>
+        <span class="label">${r.l}${r.gp ? `<span class="gptag">Last ${r.gp} @ goal</span>` : ''}</span>
       </div>
       <details class="info">
         <summary>What this run should look like</summary>
