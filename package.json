@@ -1,0 +1,14 @@
+{
+  "name": "half-marathon-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sub-10 half marathon training tracker with automatic Strava sync",
+  "scripts": {
+    "subscribe": "node scripts/subscribe.js",
+    "unsubscribe": "node scripts/unsubscribe.js",
+    "view-sub": "node scripts/view-subscription.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.1.0"
+  }
+}

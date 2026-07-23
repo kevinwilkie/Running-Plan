@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Your check-offs, notes and splits. Readable/writable by a signed-in user.
+    match /log/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    // Strava tokens are written ONLY by the server (Admin SDK bypasses rules).
+    // No client should ever read these.
+    match /strava/{docId} {
+      allow read, write: if false;
+    }
+  }
+}

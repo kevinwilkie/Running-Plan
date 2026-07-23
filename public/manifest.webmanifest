@@ -1,0 +1,16 @@
+{
+  "name": "Half Marathon Log — Sub-10",
+  "short_name": "½ Marathon",
+  "description": "Sub-10 half marathon training tracker with automatic Strava sync",
+  "start_url": "/?app=1",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E7EAEF",
+  "theme_color": "#222E54",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
