@@ -141,7 +141,10 @@
     <div class="raceline" id="raceLine">Race day · <b>Sat, Sep 26</b></div>
     <div class="bar"><i id="barFill"></i></div>
     <div class="barlabel"><span id="barText">0 of 52 runs done</span><span id="barPct">0%</span></div>
+    <!-- Strava auto-sync disabled for now. To re-enable, restore this button and
+         set the Strava env vars in Netlify (see README):
     <a id="connectBtn" class="connect" href="/.netlify/functions/strava-auth">Connect Strava</a>
+    -->
   </header>
 
   <div class="stats">
@@ -154,7 +157,7 @@
 
   <footer>
     <button class="reset" id="resetBtn">Reset all progress</button>
-    <p class="tagline">Tap any run for pacing, fueling, and to log splits and notes. Strength sessions (Tue &amp; Sat) have the full routine inside.<br>Manual edits sync to your account; finished runs auto-check from Strava.</p>
+    <p class="tagline">Tap any run for pacing, fueling, and to log splits and notes. Strength sessions (Tue &amp; Sat) have the full routine inside.<br>Everything saves to your account and syncs across your devices.</p>
   </footer>
 </div>
 
