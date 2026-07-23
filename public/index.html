@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#222E54" />
+<meta name="theme-color" content="#E7EAEF" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0F1216" media="(prefers-color-scheme: dark)" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -16,8 +17,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#E7EAEF;--card:#FFFFFF;--ink:#15181F;--muted:#6E7582;
+    --paper:#E7EAEF;--card:#FFFFFF;--ink:#15181F;--muted:#565D6B;--muted-2:#6B7280;
     --line:#E3E7EC;--accent:#F2613F;--accent-deep:#D8472A;--indigo:#222E54;--tint:#FDEFEA;--str:#5663AE;
+    --input-bg:#FAFBFC;--input-focus:#FFFFFF;--placeholder:#767E8A;
+    --info-color:#55606E;--check-border:#CDD3DB;--check-bg:#FFFFFF;
+    --fuel-bg:#FAFAF6;--fuel-border:#EFEADF;--ftag-color:#8A5512;--ftag-bg:#F4E8CF;--ftxt:#544B3C;
+    --chip-cut-bg:#EDF0F4;--chip-cut-color:#4A5262;--chip-peak-bg:#FDEAE4;--chip-taper-bg:#E9F1EC;--chip-taper-color:#356848;
+    --strtag-color:#3C4890;--strtag-bg:#E9ECF7;--str-done-bg:#EDEFF7;--str-label-done:#565E86;--done-label:#8A6E66;
+    --rest-b:#565E6B;--race-bg:linear-gradient(120deg,#FDEFEA,#FBE3DC);
+    --btn-bg:#EEF1F5;--btn-color:#3C4350;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0F1216;--card:#191E25;--ink:#E8EBF1;--muted:#9BA3AF;--muted-2:#8A929E;
+      --line:#2A313A;--accent:#F2613F;--accent-deep:#F2613F;--indigo:#222E54;--tint:#3A2116;--str:#8089CC;
+      --input-bg:#20262F;--input-focus:#262D37;--placeholder:#7B828E;
+      --info-color:#BAC2CE;--check-border:#3A424D;--check-bg:#20262F;
+      --fuel-bg:#221E17;--fuel-border:#38311F;--ftag-color:#E4BE7E;--ftag-bg:#3A3016;--ftxt:#CBC1AB;
+      --chip-cut-bg:#2A313C;--chip-cut-color:#BAC3D1;--chip-peak-bg:#3A241C;--chip-taper-bg:#1E2E24;--chip-taper-color:#93D3A9;
+      --strtag-color:#B9C0EE;--strtag-bg:#282E48;--str-done-bg:#232842;--str-label-done:#AEB6E6;--done-label:#CBAA9F;
+      --rest-b:#AEB6C2;--race-bg:linear-gradient(120deg,#2E2018,#33241C);
+      --btn-bg:#242B34;--btn-color:#C2CAD6;
+    }
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html{-webkit-text-size-adjust:100%;}
@@ -35,8 +56,6 @@
   .count .unit{font-family:'Oswald';font-weight:500;font-size:18px;text-transform:uppercase;letter-spacing:.08em;opacity:.9;padding-bottom:6px;}
   .raceline{font-size:13px;opacity:.9;margin-top:2px;}
   .raceline b{font-weight:600;}
-  .connect{display:inline-block;margin-top:14px;background:#FC5200;color:#fff;font-weight:600;font-size:13px;text-decoration:none;padding:9px 16px;border-radius:10px;-webkit-tap-highlight-color:transparent;}
-  .connect.ok{background:rgba(255,255,255,.18);font-weight:500;}
   .bar{height:8px;border-radius:6px;background:rgba(255,255,255,.22);margin-top:16px;overflow:hidden;}
   .bar > i{display:block;height:100%;width:0;border-radius:6px;background:#fff;transition:width .5s cubic-bezier(.4,0,.2,1);}
   .barlabel{display:flex;justify-content:space-between;font-size:11.5px;opacity:.9;margin-top:7px;font-variant-numeric:tabular-nums;}
@@ -60,10 +79,12 @@
   .wmeta{flex:1;min-width:0;}
   .wdates{font-size:13.5px;font-weight:600;}
   .wmiles{font-size:11.5px;color:var(--muted);margin-top:1px;}
-  .chip{font-family:'Oswald';font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;padding:4px 9px;border-radius:20px;white-space:nowrap;}
-  .chip.cut{background:#EDF0F4;color:#586072;}
-  .chip.peak{background:#FDEAE4;color:var(--accent-deep);}
-  .chip.taper{background:#E9F1EC;color:#3E7A55;}
+  .wsummary{font-size:11px;color:var(--muted-2);margin-top:3px;font-variant-numeric:tabular-nums;display:flex;flex-wrap:wrap;gap:2px 8px;}
+  .wsummary b{color:var(--accent-deep);font-weight:600;}
+  .chip{font-family:'Oswald';font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;padding:4px 9px;border-radius:20px;white-space:nowrap;align-self:flex-start;}
+  .chip.cut{background:var(--chip-cut-bg);color:var(--chip-cut-color);}
+  .chip.peak{background:var(--chip-peak-bg);color:var(--accent-deep);}
+  .chip.taper{background:var(--chip-taper-bg);color:var(--chip-taper-color);}
   .chip.race{background:var(--accent);color:#fff;}
 
   .runs{padding:5px 8px 9px;}
@@ -71,10 +92,10 @@
   .run.long{box-shadow:inset 3px 0 0 var(--accent);}
   .run.str{box-shadow:inset 3px 0 0 var(--str);}
   .run.done{background:var(--tint);}
-  .run.str.done{background:#EDEFF7;}
-  .run.race{background:linear-gradient(120deg,#FDEFEA,#FBE3DC);box-shadow:inset 3px 0 0 var(--accent);}
+  .run.str.done{background:var(--str-done-bg);}
+  .run.race{background:var(--race-bg);box-shadow:inset 3px 0 0 var(--accent);}
   .rtop{display:flex;align-items:center;gap:11px;}
-  .check{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid #CDD3DB;background:#fff;cursor:pointer;padding:0;display:grid;place-items:center;transition:all .18s;}
+  .check{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--check-border);background:var(--check-bg);cursor:pointer;padding:0;display:grid;place-items:center;transition:all .18s;}
   .check svg{width:14px;height:14px;stroke:#fff;stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .22s .02s;}
   .check[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);}
   .run.str .check[aria-pressed="true"]{background:var(--str);border-color:var(--str);}
@@ -82,13 +103,13 @@
   .check:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
   .pill{display:flex;flex-direction:column;align-items:flex-start;min-width:54px;line-height:1.12;}
   .pill b{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:.07em;color:var(--muted);}
-  .pill .pdate{font-size:10px;color:#9AA1AC;font-weight:500;margin-top:1px;font-variant-numeric:tabular-nums;}
+  .pill .pdate{font-size:10px;color:var(--muted-2);font-weight:500;margin-top:1px;font-variant-numeric:tabular-nums;}
   .run.done .pill b,.run.race .pill b{color:var(--accent-deep);}
   .run.str.done .pill b{color:var(--str);}
   .label{flex:1;font-size:14px;font-weight:500;min-width:0;}
-  .run.done .label{color:#8A6E66;}
-  .run.str.done .label{color:#565E86;}
-  .strtag{display:inline-block;font-family:'Oswald';font-weight:600;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#46529B;background:#E9ECF7;border-radius:4px;padding:2px 6px;margin-right:6px;vertical-align:1px;}
+  .run.done .label{color:var(--done-label);}
+  .run.str.done .label{color:var(--str-label-done);}
+  .strtag{display:inline-block;font-family:'Oswald';font-weight:600;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--strtag-color);background:var(--strtag-bg);border-radius:4px;padding:2px 6px;margin-right:6px;vertical-align:1px;}
 
   .info{margin:7px 0 2px 37px;}
   .info summary{cursor:pointer;list-style:none;font-size:12px;font-weight:600;color:var(--accent-deep);
@@ -98,16 +119,16 @@
   .info summary::before{content:'';width:0;height:0;border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .18s;}
   .info[open] summary::before{transform:rotate(90deg);}
   .info summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px;}
-  .info-body{font-size:12.5px;color:#55606E;line-height:1.55;padding:7px 4px 4px 14px;border-left:2px solid var(--line);margin-top:4px;}
+  .info-body{font-size:12.5px;color:var(--info-color);line-height:1.55;padding:7px 4px 4px 14px;border-left:2px solid var(--line);margin-top:4px;}
   .info-body b{color:var(--ink);font-weight:600;}
   .howto{margin-bottom:9px;}
 
-  .fuel{background:#FAFAF6;border:1px solid #EFEADF;border-radius:9px;padding:9px 10px;margin-bottom:11px;}
+  .fuel{background:var(--fuel-bg);border:1px solid var(--fuel-border);border-radius:9px;padding:9px 10px;margin-bottom:11px;}
   .fuel-row{display:flex;gap:9px;}
   .fuel-row+.fuel-row{margin-top:7px;}
   .ftag{flex:none;font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:.05em;text-transform:uppercase;
-    color:#A86B22;background:#F4E8CF;border-radius:5px;padding:3px 0;height:fit-content;width:54px;text-align:center;margin-top:1px;}
-  .fuel-row .ftxt{color:#5A5142;font-size:12px;line-height:1.5;}
+    color:var(--ftag-color);background:var(--ftag-bg);border-radius:5px;padding:3px 0;height:fit-content;width:54px;text-align:center;margin-top:1px;}
+  .fuel-row .ftxt{color:var(--ftxt);font-size:12px;line-height:1.5;}
 
   .exlist{list-style:none;margin:0 0 4px;}
   .exlist li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);}
@@ -117,23 +138,41 @@
 
   .logblock{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);}
   .logtitle{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-  .logtitle .sub{font-weight:500;text-transform:none;letter-spacing:0;color:#A4ABB5;font-size:10.5px;}
+  .logtitle .sub{font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted-2);font-size:10.5px;}
   .splits{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px;margin-bottom:10px;}
   .split{display:flex;flex-direction:column;gap:2px;}
-  .split > span{font-size:9px;font-weight:600;color:#9AA1AC;text-align:center;letter-spacing:.04em;text-transform:uppercase;}
-  .split input{width:100%;text-align:center;border:1px solid var(--line);background:#FAFBFC;border-radius:7px;padding:6px 2px;font:inherit;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink);}
-  .split input:focus{outline:none;border-color:var(--accent);background:#fff;box-shadow:0 0 0 2px var(--tint);}
-  .notewrap input{width:100%;border:1px solid var(--line);background:#FAFBFC;border-radius:9px;padding:8px 11px;font:inherit;font-size:13px;color:var(--ink);}
-  .notewrap input::placeholder{color:#A9B0BA;}
-  .notewrap input:focus{outline:none;border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--tint);}
+  .split > span{font-size:9px;font-weight:600;color:var(--muted-2);text-align:center;letter-spacing:.04em;text-transform:uppercase;}
+  .split input{width:100%;text-align:center;border:1px solid var(--line);background:var(--input-bg);border-radius:7px;padding:6px 2px;font:inherit;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink);}
+  .split input::placeholder{color:var(--placeholder);}
+  .split input:focus{outline:none;border-color:var(--accent);background:var(--input-focus);box-shadow:0 0 0 2px var(--tint);}
+  .notewrap input{width:100%;border:1px solid var(--line);background:var(--input-bg);border-radius:9px;padding:8px 11px;font:inherit;font-size:13px;color:var(--ink);}
+  .notewrap input::placeholder{color:var(--placeholder);}
+  .notewrap input:focus{outline:none;border-color:var(--accent);background:var(--input-focus);box-shadow:0 0 0 3px var(--tint);}
 
   .rest{font-size:11.5px;color:var(--muted);padding:8px 14px 13px;border-top:1px dashed var(--line);margin-top:4px;}
-  .rest b{color:#565E6B;font-weight:600;}
+  .rest b{color:var(--rest-b);font-weight:600;}
 
   footer{text-align:center;margin-top:26px;}
+  .footer-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:10px;}
+  .fbtn{background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:9px;padding:8px 14px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .fbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .fbtn[hidden]{display:none;}
   .reset{background:none;border:none;color:var(--muted);font:inherit;font-size:12.5px;text-decoration:underline;cursor:pointer;padding:6px;}
   .tagline{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;}
   .loading{text-align:center;color:var(--muted);padding:40px;font-size:14px;}
+
+  #authGate{position:fixed;inset:0;z-index:1000;background:var(--paper);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;gap:12px;}
+  #authGate.show{display:flex;}
+  #authGate .ag-eyebrow{font-family:'Oswald';font-weight:500;letter-spacing:.22em;text-transform:uppercase;font-size:11px;color:var(--muted);}
+  #authGate h1{font-family:'Oswald';font-weight:700;font-size:27px;color:var(--ink);line-height:1.1;}
+  #authGate p{font-size:13.5px;color:var(--muted);max-width:300px;line-height:1.55;}
+  #googleBtn{margin-top:6px;display:inline-flex;align-items:center;gap:10px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 20px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px -8px rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent;}
+  #googleBtn:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
+  #googleBtn svg{width:18px;height:18px;flex:none;}
+
+  #undoToast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:1100;background:var(--ink);color:var(--card);border-radius:12px;padding:11px 15px;display:none;align-items:center;gap:16px;font-size:13px;box-shadow:0 8px 24px -8px rgba(0,0,0,.5);max-width:92vw;}
+  #undoToast.show{display:flex;}
+  #undoToast button{background:none;border:none;color:var(--accent);font:inherit;font-weight:700;font-size:13px;cursor:pointer;padding:2px 4px;-webkit-tap-highlight-color:transparent;}
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
   @media (max-width:380px){.count .num{font-size:52px;}}
@@ -147,10 +186,6 @@
     <div class="raceline" id="raceLine">Race day · <b>Sat, Sep 26</b></div>
     <div class="bar"><i id="barFill"></i></div>
     <div class="barlabel"><span id="barText">0 of 52 runs done</span><span id="barPct">0%</span></div>
-    <!-- Strava auto-sync disabled for now. To re-enable, restore this button and
-         set the Strava env vars in Netlify (see README):
-    <a id="connectBtn" class="connect" href="/.netlify/functions/strava-auth">Connect Strava</a>
-    -->
   </header>
 
   <div class="stats">
@@ -162,17 +197,35 @@
   <div id="weeks"><div class="loading">Loading your log…</div></div>
 
   <footer>
+    <div class="footer-actions">
+      <button class="fbtn" id="exportJsonBtn" hidden>Export JSON</button>
+      <button class="fbtn" id="exportCsvBtn" hidden>Export CSV</button>
+      <button class="fbtn" id="signOutBtn" hidden>Sign out</button>
+    </div>
     <button class="reset" id="resetBtn">Reset all progress</button>
     <p class="tagline">Tap any run for pacing, fueling, and to log splits and notes. Strength sessions (Tue &amp; Sat) have the full routine inside.<br>Everything saves to your account and syncs across your devices.</p>
   </footer>
 </div>
 
+<div id="authGate">
+  <div class="ag-eyebrow">Half Marathon · Sub-10 Goal</div>
+  <h1>Your training log</h1>
+  <p>Sign in to load your runs, splits, and notes. Your log is private to your account.</p>
+  <button id="googleBtn">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Sign in with Google
+  </button>
+</div>
+
+<div id="undoToast"><span id="undoMsg">Progress cleared.</span><button id="undoBtn">Undo</button></div>
+
 <script type="module">
   // ===== FILL IN your Firebase web config (Project settings -> Your apps -> Web) =====
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot }
+  import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager,
+           doc, setDoc, deleteDoc, collection, onSnapshot }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged }
+  import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -185,17 +238,33 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+
+  // Offline-first: queue writes locally (IndexedDB) and replay on reconnect.
+  // Falls back to in-memory (online-only) if the browser blocks persistence.
+  let db;
+  try {
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    });
+  } catch (e) {
+    console.warn('Firestore persistence unavailable, using online-only cache', e);
+    db = getFirestore(app);
+  }
+
   const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
   window.FB = { db, doc, setDoc, deleteDoc, collection, onSnapshot };
-  window.FBReady = new Promise((resolve, reject) => {
-    onAuthStateChanged(auth, (u) => { if (u) resolve(u); });
-    signInAnonymously(auth).catch(reject);
-  });
+  window.FBAuth = {
+    signIn: () => signInWithRedirect(auth, provider),
+    signOut: () => signOut(auth),
+    onChange: (cb) => onAuthStateChanged(auth, cb)
+  };
+  // Resolves once any pending redirect sign-in has settled, so the app doesn't
+  // flash the sign-in gate after returning from Google.
+  window.FBReady = getRedirectResult(auth).catch((e) => { window.FBAuthError = e; });
 </script>
 <script>
 const RACE = new Date(2026,8,26);
-const KEY = 'halflog-v1';
 const MON0 = new Date(2026,5,29);
 const DOFF = {MON:0,TUE:1,WED:2,THU:3,FRI:4,SAT:5,SUN:6};
 const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -305,17 +374,20 @@ function fuelFor(r){
 }
 
 let log = {};
-let saveTimer = null;
+let currentUser = null;
 function rid(w,i){return 'w'+w+'r'+i;}
 function esc(s){return (s||'').replace(/"/g,'&quot;');}
 
 // Per-document save to Firestore (merge so we never clobber other fields).
 const saveTimers = {};
 function saveItem(id){
+  if(!currentUser) return;               // gated: only save when signed in
   clearTimeout(saveTimers[id]);
   saveTimers[id] = setTimeout(async ()=>{
+    // Offline writes resolve against the local cache and replay on reconnect;
+    // a rejection here is a genuine failure (e.g. permission denied), so surface it.
     try{ await window.FB.setDoc(window.FB.doc(window.FB.db,'log',id), log[id]||{}, {merge:true}); }
-    catch(e){ console.error('save failed', e); }
+    catch(e){ console.error('save failed', e); showError('Couldn’t save: '+(e.code||e.message)); }
   }, 350);
 }
 
@@ -334,8 +406,8 @@ function currentWeek(){
   const now = new Date();
   for(let i=0;i<weeks.length;i++){
     const start = new Date(MON0); start.setDate(start.getDate()+7*i);
-    const end = new Date(start); end.setDate(end.getDate()+6);
-    if(now <= end) return weeks[i].n;
+    const next = new Date(start); next.setDate(next.getDate()+7);
+    if(now < next) return weeks[i].n;   // include all of Sunday in this week
   }
   return 13;
 }
@@ -357,7 +429,7 @@ function runRow(w, r, i){
   let splitsHtml = '';
   for(let k=0;k<n;k++){
     const lbl = (r.race && k===n-1) ? 'Last' : (k+1);
-    splitsHtml += `<label class="split"><span>Mi ${lbl}</span><input type="text" data-split="${id}" data-mi="${k}" value="${esc(sp[k])}" placeholder="–:––" aria-label="Mile ${k+1} pace"></label>`;
+    splitsHtml += `<label class="split"><span>Mi ${lbl}</span><input type="text" inputmode="numeric" data-split="${id}" data-mi="${k}" value="${esc(sp[k])}" placeholder="–:––" aria-label="Mile ${k+1} pace"></label>`;
   }
   return `
     <div class="run${kind}${done}" data-row="${id}">
@@ -380,7 +452,7 @@ function runRow(w, r, i){
           <div class="logblock">
             <div class="logtitle">Mile splits <span class="sub">— pace per mile</span></div>
             <div class="splits">${splitsHtml}</div>
-            <div class="notewrap"><input type="text" data-note="${id}" value="${note}" placeholder="Notes — how'd it feel, weather, effort…" /></div>
+            <div class="notewrap"><input type="text" inputmode="text" autocapitalize="sentences" data-note="${id}" value="${note}" placeholder="Notes — how'd it feel, weather, effort…" /></div>
           </div>
         </div>
       </details>
@@ -410,7 +482,7 @@ function strRow(w, day, sKey){
         <div class="info-body">
           <div class="howto">${intro}</div>
           <ul class="exlist">${exHtml}</ul>
-          <div class="logblock"><div class="notewrap"><input type="text" data-note="${id}" value="${note}" placeholder="Notes — added weight, how it felt…" /></div></div>
+          <div class="logblock"><div class="notewrap"><input type="text" inputmode="text" autocapitalize="sentences" data-note="${id}" value="${note}" placeholder="Notes — added weight, how it felt…" /></div></div>
         </div>
       </details>
     </div>`;
@@ -438,7 +510,7 @@ function render(){
     card.innerHTML = `
       <div class="whead" role="button" tabindex="0" aria-expanded="${open?'true':'false'}" aria-label="Week ${w.n} — tap to ${open?'collapse':'expand'}">
         <div class="bib"><small>WK</small>${String(w.n).padStart(2,'0')}</div>
-        <div class="wmeta"><div class="wdates">${w.d}</div><div class="wmiles">${w.mi==='—'?'Race week':w.mi+' miles'}</div></div>
+        <div class="wmeta"><div class="wdates">${w.d}</div><div class="wmiles">${w.mi==='—'?'Race week':w.mi+' miles'}</div><div class="wsummary" data-wsum="${w.n}">${weekSummary(w)}</div></div>
         ${chip}
         <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
       </div>
@@ -465,7 +537,7 @@ function render(){
       log[id].done = !log[id].done;
       btn.setAttribute('aria-pressed', log[id].done?'true':'false');
       btn.closest('.run').classList.toggle('done', log[id].done);
-      saveItem(id); updateStats();
+      saveItem(id); updateStats(); refreshWeekOf(btn);
     });
   });
   host.querySelectorAll('input[data-note]').forEach(inp=>{
@@ -482,10 +554,38 @@ function render(){
       log[id] = log[id]||{};
       log[id].splits = log[id].splits||{};
       log[id].splits[k] = inp.value;
-      saveItem(id);
+      saveItem(id); refreshWeekOf(inp);
     });
   });
   updateStats();
+}
+
+function paceToSec(s){
+  const m = String(s||'').trim().match(/^(\d{1,2}):([0-5]?\d)$/);
+  return m ? (+m[1])*60 + (+m[2]) : null;
+}
+function secToPace(sec){
+  const m = Math.floor(sec/60), s = Math.round(sec%60);
+  return (s===60 ? (m+1)+':00' : m + ':' + String(s).padStart(2,'0'));
+}
+function weekSummary(w){
+  let done=0, total=0, doneMi=0, planMi=0, paceSum=0, paceN=0;
+  w.runs.forEach((r,i)=>{
+    total++; planMi += r.mi;
+    const st = log[rid(w.n,i)]||{};
+    if(st.done){ done++; doneMi += r.mi; }
+    if(st.splits){ Object.values(st.splits).forEach(v=>{ const p=paceToSec(v); if(p){ paceSum+=p; paceN++; } }); }
+  });
+  const r1 = x => Math.round(x*10)/10;
+  const parts = [`<b>${done}</b>/${total} runs`, `<b>${r1(doneMi)}</b>/${r1(planMi)} mi of plan`];
+  if(paceN) parts.push(`<b>${secToPace(paceSum/paceN)}</b>/mi avg`);
+  return parts.join(' · ');
+}
+
+function refreshWeekOf(el){
+  const wk = el.closest && el.closest('.week'); if(!wk) return;
+  const s = wk.querySelector('.wsummary[data-wsum]');
+  if(s){ const w = weeks.find(x=>x.n === +s.dataset.wsum); if(w) s.innerHTML = weekSummary(w); }
 }
 
 function updateStats(){
@@ -503,24 +603,101 @@ function updateStats(){
   document.getElementById('barPct').textContent = pct+'%';
 }
 
-document.getElementById('resetBtn').addEventListener('click', async ()=>{
-  if(!confirm('Clear all check-offs, splits, and notes? This can’t be undone.')) return;
-  const ids = Object.keys(log); log = {};
-  try{ await Promise.all(ids.map(id => window.FB.deleteDoc(window.FB.doc(window.FB.db,'log',id)))); }catch(e){}
-  render();
-});
+// ----- Backup / export -----
+function downloadBlob(filename, mime, text){
+  const blob = new Blob([text], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function exportJson(){
+  downloadBlob('halflog-'+todayStr()+'.json', 'application/json', JSON.stringify(log, null, 2));
+}
+function csvCell(v){
+  v = (v==null?'':String(v));
+  return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+}
+function exportCsv(){
+  const rows = [['date','week','day','label','done','splits','note']];
+  weeks.forEach(w=>{
+    w.runs.forEach((r,i)=>{
+      const st = log[rid(w.n,i)]||{};
+      const splits = st.splits ? Object.keys(st.splits).sort((a,b)=>a-b).map(k=>st.splits[k]).join(' | ') : '';
+      rows.push([dateFor(w.n,r.day)+' 2026', w.n, r.day, r.l, st.done?'yes':'', splits, st.note||'']);
+    });
+    if(w.n<13){
+      [['TUE','A'],['SAT','B']].forEach(([day,k])=>{
+        const st = log['w'+w.n+'s'+k]||{};
+        rows.push([dateFor(w.n,day)+' 2026', w.n, day, 'Strength '+k+' — '+SESSIONS[k].name, st.done?'yes':'', '', st.note||'']);
+      });
+    }
+  });
+  const csv = rows.map(r=>r.map(csvCell).join(',')).join('\n');
+  downloadBlob('halflog-'+todayStr()+'.csv', 'text/csv', csv);
+}
+
+// ----- Safer reset with undo -----
+let undoTimer = null, resetBusy = false;
+function hideUndoToast(){
+  const t = document.getElementById('undoToast');
+  if(t) t.classList.remove('show');
+  if(undoTimer){ clearTimeout(undoTimer); undoTimer = null; }
+}
+function showUndoToast(msg, onUndo, seconds){
+  const t = document.getElementById('undoToast');
+  document.getElementById('undoMsg').textContent = msg;
+  const btn = document.getElementById('undoBtn');
+  const fresh = btn.cloneNode(true); btn.replaceWith(fresh);   // drop any old listener
+  fresh.addEventListener('click', ()=>{ hideUndoToast(); onUndo(); });
+  t.classList.add('show');
+  if(undoTimer) clearTimeout(undoTimer);
+  undoTimer = setTimeout(hideUndoToast, seconds*1000);
+}
+async function doReset(){
+  if(resetBusy) return;
+  if(!currentUser){ showError('Sign in to manage your log.'); return; }
+  if(!confirm('Clear ALL check-offs, splits and notes?')) return;
+  if(!confirm('Are you sure? This wipes every logged run. You’ll have a few seconds to undo.')) return;
+  resetBusy = true;
+  const backup = JSON.parse(JSON.stringify(log));
+  const ids = Object.keys(backup);
+  log = {}; applyRemote();
+  try{
+    await Promise.all(ids.map(id => window.FB.deleteDoc(window.FB.doc(window.FB.db,'log',id))));
+  }catch(e){ showError('Reset failed: '+(e.code||e.message)); }
+  resetBusy = false;
+  if(!ids.length) return;
+  showUndoToast('Progress cleared.', async ()=>{
+    log = backup; applyRemote();
+    try{
+      await Promise.all(Object.keys(backup).map(id =>
+        window.FB.setDoc(window.FB.doc(window.FB.db,'log',id), backup[id], {merge:true})));
+    }catch(e){ showError('Undo failed: '+(e.code||e.message)); }
+  }, 7);
+}
 
 function applyRemote(){
   document.querySelectorAll('.run').forEach(row=>{
     const id = row.dataset.row, st = log[id]||{};
     const btn = row.querySelector('.check');
     if(btn){ btn.setAttribute('aria-pressed', st.done?'true':'false'); row.classList.toggle('done', !!st.done); }
-    if(st.splits){ row.querySelectorAll('input[data-split]').forEach(inp=>{
+    row.querySelectorAll('input[data-split]').forEach(inp=>{
       const k = inp.dataset.mi;
-      if(document.activeElement!==inp && st.splits[k]!=null) inp.value = st.splits[k];
-    }); }
+      const v = (st.splits && st.splits[k]!=null) ? st.splits[k] : '';
+      if(document.activeElement!==inp) inp.value = v;
+    });
     const ni = row.querySelector('input[data-note]');
-    if(ni && document.activeElement!==ni && st.note!=null) ni.value = st.note;
+    if(ni && document.activeElement!==ni) ni.value = (st.note!=null ? st.note : '');
+  });
+  document.querySelectorAll('.wsummary[data-wsum]').forEach(el=>{
+    const w = weeks.find(x=>x.n === +el.dataset.wsum);
+    if(w) el.innerHTML = weekSummary(w);
   });
   updateStats();
 }
@@ -530,6 +707,9 @@ function showError(msg){
   if(!b){
     b = document.createElement('div');
     b.id = 'errBanner';
+    b.setAttribute('role', 'alert');
+    b.setAttribute('aria-live', 'assertive');
+    b.setAttribute('aria-atomic', 'true');
     b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#b00020;color:#fff;'
       + 'padding:10px 14px;font-size:12px;line-height:1.4;text-align:center;';
     document.body.appendChild(b);
@@ -537,30 +717,50 @@ function showError(msg){
   b.textContent = msg;
 }
 
+// ----- Auth gate + live sync -----
+let unsub = null;
+function subscribeLog(){
+  if(unsub) return;
+  unsub = window.FB.onSnapshot(window.FB.collection(window.FB.db,'log'),
+    snap=>{ log = {}; snap.forEach(d=>{ log[d.id] = d.data(); }); applyRemote(); },
+    err=>{ console.error('sync error', err); showError('Sync blocked: '+(err.code||err.message)); }
+  );
+}
+function unsubscribeLog(){
+  if(unsub){ unsub(); unsub = null; }
+  log = {}; applyRemote();
+}
+function setSignedIn(user){
+  currentUser = user || null;
+  const on = !!user;
+  document.getElementById('authGate').classList.toggle('show', !on);
+  document.getElementById('signOutBtn').hidden = !on;
+  document.getElementById('exportJsonBtn').hidden = !on;
+  document.getElementById('exportCsvBtn').hidden = !on;
+}
+
 (async function init(){
   countdown();
   render();
-  if(new URLSearchParams(location.search).get('connected')){
-    const b = document.getElementById('connectBtn');
-    if(b){ b.textContent = 'Strava connected'; b.classList.add('ok'); b.removeAttribute('href'); }
-  }
+  document.getElementById('resetBtn').addEventListener('click', doReset);
+  document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
+  document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+  document.getElementById('signOutBtn').addEventListener('click', ()=>window.FBAuth.signOut());
+  document.getElementById('googleBtn').addEventListener('click', ()=>window.FBAuth.signIn());
   try{
-    // Firebase is set up in a deferred <script type="module"> below, so window.FB
-    // / window.FBReady may not exist yet when this immediate script runs. Wait for
-    // the module to publish them before wiring live sync.
+    // Firebase is set up in a deferred <script type="module">, so window.FB /
+    // window.FBAuth may not exist yet. Wait for the module to publish them.
     let waited = 0;
-    while((!window.FB || !window.FBReady) && waited < 15000){
+    while((!window.FB || !window.FBAuth || !window.FBReady) && waited < 15000){
       await new Promise(r=>setTimeout(r,25)); waited += 25;
     }
-    if(!window.FB || !window.FBReady) throw new Error('Firebase SDK did not load (offline or blocked)');
-    await window.FBReady;
-    window.FB.onSnapshot(window.FB.collection(window.FB.db,'log'),
-      snap=>{
-        log = {}; snap.forEach(d=>{ log[d.id] = d.data(); });
-        applyRemote();
-      },
-      err=>{ console.error('sync error', err); showError('Sync blocked: '+(err.code||err.message)+' — check Firestore Rules.'); }
-    );
+    if(!window.FB || !window.FBAuth) throw new Error('Firebase SDK did not load (offline or blocked)');
+    await window.FBReady;   // settles any pending Google redirect result
+    if(window.FBAuthError) showError('Sign-in error: '+(window.FBAuthError.code||window.FBAuthError.message));
+    window.FBAuth.onChange(user=>{
+      setSignedIn(user);
+      if(user) subscribeLog(); else unsubscribeLog();
+    });
   }catch(e){
     console.error('Firebase init failed', e);
     showError('Firebase init failed: '+(e.code||e.message));

@@ -1,9 +1,20 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Your check-offs, notes and splits. Readable/writable by a signed-in user.
+
+    // === CHANGE THIS to the Google account email that owns this tracker ===
+    function ownerEmail() { return "kevin.wilkie@campusoutreach.org"; }
+
+    // Only the owner's verified Google account can read/write the log.
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == ownerEmail();
+    }
+
+    // Your check-offs, notes and splits — private to the owner.
     match /log/{docId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if isOwner();
     }
     // Strava tokens are written ONLY by the server (Admin SDK bypasses rules).
     // No client should ever read these.
