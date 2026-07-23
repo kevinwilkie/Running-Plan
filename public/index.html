@@ -525,6 +525,14 @@ function showError(msg){
     if(b){ b.textContent = 'Strava connected'; b.classList.add('ok'); b.removeAttribute('href'); }
   }
   try{
+    // Firebase is set up in a deferred <script type="module"> below, so window.FB
+    // / window.FBReady may not exist yet when this immediate script runs. Wait for
+    // the module to publish them before wiring live sync.
+    let waited = 0;
+    while((!window.FB || !window.FBReady) && waited < 15000){
+      await new Promise(r=>setTimeout(r,25)); waited += 25;
+    }
+    if(!window.FB || !window.FBReady) throw new Error('Firebase SDK did not load (offline or blocked)');
     await window.FBReady;
     window.FB.onSnapshot(window.FB.collection(window.FB.db,'log'),
       snap=>{
@@ -535,7 +543,7 @@ function showError(msg){
     );
   }catch(e){
     console.error('Firebase init failed', e);
-    showError('Firebase sign-in failed: '+(e.code||e.message)+' — check Anonymous auth.');
+    showError('Firebase init failed: '+(e.code||e.message));
   }
 })();
 </script>
