@@ -51,10 +51,10 @@
   .dawn{position:relative;overflow:hidden;
     background:linear-gradient(150deg,var(--indigo) 0%,#7A3E63 52%,var(--accent) 100%);
     color:#fff;border-radius:0 0 22px 22px;padding:26px 20px 22px;margin-bottom:18px;
-    box-shadow:0 10px 28px -16px rgba(34,46,84,.6);}
+    box-shadow:0 10px 28px -16px rgba(34,46,84,.6);transition:padding .22s ease,border-radius .22s ease,margin .22s ease;}
   .eyebrow{font-family:'Oswald';font-weight:500;letter-spacing:.22em;text-transform:uppercase;font-size:11px;opacity:.82;}
   .count{display:flex;align-items:baseline;gap:10px;margin-top:6px;}
-  .count .num{font-family:'Oswald';font-weight:700;font-size:62px;line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  .count .num{font-family:'Oswald';font-weight:700;font-size:62px;line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-.01em;transition:font-size .22s ease;}
   .count .unit{font-family:'Oswald';font-weight:500;font-size:18px;text-transform:uppercase;letter-spacing:.08em;opacity:.9;padding-bottom:6px;}
   .raceline{font-size:13px;opacity:.9;margin-top:2px;}
   .raceline b{font-weight:600;}
@@ -64,6 +64,16 @@
 
   .topbar{position:sticky;top:0;z-index:50;background:var(--paper);padding-top:env(safe-area-inset-top);}
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px;padding-bottom:4px;}
+  /* compact: once scrolled, the top bar folds into a slim strip */
+  .topbar .stats{overflow:hidden;transition:max-height .22s ease,opacity .18s ease,margin .22s ease,padding .22s ease;}
+  .topbar .eyebrow,.topbar .raceline{transition:opacity .18s ease;}
+  .topbar.compact .dawn{padding:11px 20px 12px;border-radius:0 0 16px 16px;margin-bottom:0;}
+  .topbar.compact .eyebrow,.topbar.compact .raceline{opacity:0;height:0;margin:0;overflow:hidden;}
+  .topbar.compact .count{margin-top:0;}
+  .topbar.compact .count .num{font-size:25px;}
+  .topbar.compact .count .unit{font-size:12px;padding-bottom:2px;}
+  .topbar.compact .bar{margin-top:8px;}
+  .topbar.compact .stats{max-height:0;opacity:0;margin:0;padding:0;pointer-events:none;}
   .stat{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 12px;text-align:center;}
   .stat .v{font-family:'Oswald';font-weight:600;font-size:24px;font-variant-numeric:tabular-nums;line-height:1;}
   .stat .v small{font-size:13px;color:var(--muted);font-weight:500;}
@@ -835,6 +845,16 @@ function setSignedIn(user){
     console.error('Firebase init failed', e);
     showError('Firebase init failed: '+(e.code||e.message));
   }
+})();
+
+// Collapse the sticky top bar into a slim strip once the user scrolls.
+(function(){
+  const bar = document.querySelector('.topbar');
+  if(!bar) return;
+  let ticking = false;
+  function update(){ bar.classList.toggle('compact', window.scrollY > 40); ticking = false; }
+  window.addEventListener('scroll', ()=>{ if(!ticking){ ticking = true; requestAnimationFrame(update); } }, {passive:true});
+  update();
 })();
 </script>
 <script>
