@@ -62,7 +62,8 @@
   .bar > i{display:block;height:100%;width:0;border-radius:6px;background:#fff;transition:width .5s cubic-bezier(.4,0,.2,1);}
   .barlabel{display:flex;justify-content:space-between;font-size:11.5px;opacity:.9;margin-top:7px;font-variant-numeric:tabular-nums;}
 
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:20px;}
+  .topbar{position:sticky;top:0;z-index:50;background:var(--paper);padding-top:env(safe-area-inset-top);}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px;padding-bottom:4px;}
   .stat{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 12px;text-align:center;}
   .stat .v{font-family:'Oswald';font-weight:600;font-size:24px;font-variant-numeric:tabular-nums;line-height:1;}
   .stat .v small{font-size:13px;color:var(--muted);font-weight:500;}
@@ -185,6 +186,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div class="topbar">
   <header class="dawn">
     <div class="eyebrow">Half Marathon · Sub-10 Goal</div>
     <div class="count"><span class="num" id="countNum">–</span><span class="unit" id="countUnit">to go</span></div>
@@ -197,6 +199,7 @@
     <div class="stat"><div class="v" id="stRuns">0<small>/60</small></div><div class="k">Runs</div></div>
     <div class="stat"><div class="v" id="stMiles">0<small> mi</small></div><div class="k">Logged</div></div>
     <div class="stat"><div class="v" id="stWeek">1<small>/13</small></div><div class="k">Week</div></div>
+  </div>
   </div>
 
   <div id="weeks"><div class="loading">Loading your log…</div></div>
