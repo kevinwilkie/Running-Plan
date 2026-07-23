@@ -63,24 +63,16 @@
   .barlabel{display:flex;justify-content:space-between;font-size:11.5px;opacity:.9;margin-top:7px;font-variant-numeric:tabular-nums;}
 
   .topbar{position:sticky;top:0;z-index:50;background:var(--paper);padding-top:env(safe-area-inset-top);}
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px;padding-bottom:4px;}
-  /* compact: once scrolled, the top bar folds into a slim strip */
-  .topbar .stats{overflow:hidden;transition:max-height .22s ease,opacity .18s ease,margin .22s ease,padding .22s ease;}
+  /* compact: once scrolled, the header folds into a slimmer strip */
   .topbar .eyebrow,.topbar .raceline{transition:opacity .18s ease;}
-  .topbar.compact .dawn{padding:11px 20px 12px;border-radius:0 0 16px 16px;margin-bottom:0;}
+  .topbar.compact .dawn{padding:11px 20px 12px;border-radius:0 0 16px 16px;}
   .topbar.compact .eyebrow,.topbar.compact .raceline{opacity:0;height:0;margin:0;overflow:hidden;}
   .topbar.compact .count{margin-top:0;}
   .topbar.compact .count .num{font-size:25px;}
   .topbar.compact .count .unit{font-size:12px;padding-bottom:2px;}
   .topbar.compact .bar{margin-top:8px;}
-  .topbar.compact .stats{max-height:0;opacity:0;margin:0;padding:0;pointer-events:none;}
-  .compactstats{display:none;font-size:11.5px;opacity:.92;margin-top:5px;font-variant-numeric:tabular-nums;}
+  .compactstats{font-size:12px;opacity:.92;margin-top:6px;font-variant-numeric:tabular-nums;}
   .compactstats b{font-weight:700;}
-  .topbar.compact .compactstats{display:block;}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 12px;text-align:center;}
-  .stat .v{font-family:'Oswald';font-weight:600;font-size:24px;font-variant-numeric:tabular-nums;line-height:1;}
-  .stat .v small{font-size:13px;color:var(--muted);font-weight:500;}
-  .stat .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:5px;font-weight:600;}
 
   .week{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;overflow:hidden;}
   .whead{display:flex;align-items:center;gap:12px;padding:14px 15px 13px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
@@ -208,12 +200,6 @@
     <div class="barlabel"><span id="barText">0 of 60 runs done</span><span id="barPct">0%</span></div>
     <div class="compactstats" id="compactStats"></div>
   </header>
-
-  <div class="stats">
-    <div class="stat"><div class="v" id="stRuns">0<small>/60</small></div><div class="k">Runs</div></div>
-    <div class="stat"><div class="v" id="stMiles">0<small> mi</small></div><div class="k">Logged</div></div>
-    <div class="stat"><div class="v" id="stWeek">1<small>/13</small></div><div class="k">Week</div></div>
-  </div>
   </div>
 
   <div id="weeks"><div class="loading">Loading your log…</div></div>
@@ -673,9 +659,6 @@ function updateStats(){
     if((log[rid(w.n,i)]||{}).done){ done++; miles+=r.mi; }
   }));
   const pct = total? Math.round(done/total*100):0;
-  document.getElementById('stRuns').innerHTML = done+'<small>/'+total+'</small>';
-  document.getElementById('stMiles').innerHTML = (Math.round(miles*10)/10)+'<small> mi</small>';
-  document.getElementById('stWeek').innerHTML = currentWeek()+'<small>/13</small>';
   document.getElementById('barFill').style.width = pct+'%';
   document.getElementById('barText').textContent = done+' of '+total+' runs done';
   document.getElementById('barPct').textContent = pct+'%';
