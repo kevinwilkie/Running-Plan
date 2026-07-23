@@ -505,6 +505,18 @@ function applyRemote(){
   updateStats();
 }
 
+function showError(msg){
+  let b = document.getElementById('errBanner');
+  if(!b){
+    b = document.createElement('div');
+    b.id = 'errBanner';
+    b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#b00020;color:#fff;'
+      + 'padding:10px 14px;font-size:12px;line-height:1.4;text-align:center;';
+    document.body.appendChild(b);
+  }
+  b.textContent = msg;
+}
+
 (async function init(){
   countdown();
   render();
@@ -514,11 +526,17 @@ function applyRemote(){
   }
   try{
     await window.FBReady;
-    window.FB.onSnapshot(window.FB.collection(window.FB.db,'log'), snap=>{
-      log = {}; snap.forEach(d=>{ log[d.id] = d.data(); });
-      applyRemote();
-    });
-  }catch(e){ console.error('Firebase init failed', e); }
+    window.FB.onSnapshot(window.FB.collection(window.FB.db,'log'),
+      snap=>{
+        log = {}; snap.forEach(d=>{ log[d.id] = d.data(); });
+        applyRemote();
+      },
+      err=>{ console.error('sync error', err); showError('Sync blocked: '+(err.code||err.message)+' — check Firestore Rules.'); }
+    );
+  }catch(e){
+    console.error('Firebase init failed', e);
+    showError('Firebase sign-in failed: '+(e.code||e.message)+' — check Anonymous auth.');
+  }
 })();
 </script>
 <script>
