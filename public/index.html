@@ -723,7 +723,11 @@ function subscribeLog(){
   if(unsub) return;
   unsub = window.FB.onSnapshot(window.FB.collection(window.FB.db,'log'),
     snap=>{ log = {}; snap.forEach(d=>{ log[d.id] = d.data(); }); applyRemote(); },
-    err=>{ console.error('sync error', err); showError('Sync blocked: '+(err.code||err.message)); }
+    err=>{
+      console.error('sync error', err);
+      const who = currentUser ? (currentUser.email || 'no-email') + ' (verified: ' + currentUser.emailVerified + ')' : 'not signed in';
+      showError('Sync blocked: ' + (err.code||err.message) + ' — signed in as ' + who);
+    }
   );
 }
 function unsubscribeLog(){
