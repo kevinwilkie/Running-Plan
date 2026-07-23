@@ -225,7 +225,7 @@
   import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager,
            doc, setDoc, deleteDoc, collection, onSnapshot }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -255,7 +255,24 @@
   const provider = new GoogleAuthProvider();
   window.FB = { db, doc, setDoc, deleteDoc, collection, onSnapshot };
   window.FBAuth = {
-    signIn: () => signInWithRedirect(auth, provider),
+    // Popup keeps the whole flow same-origin, so the session persists even when
+    // the browser partitions the cross-site firebaseapp.com auth storage that
+    // signInWithRedirect depends on. Fall back to redirect only if the popup is
+    // blocked or unsupported.
+    signIn: async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        const code = e && e.code;
+        if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment'
+            || code === 'auth/cancelled-popup-request' || code === 'auth/popup-closed-by-user') {
+          if (code === 'auth/popup-closed-by-user') return; // user dismissed; don't redirect
+          await signInWithRedirect(auth, provider);
+        } else {
+          throw e;
+        }
+      }
+    },
     signOut: () => signOut(auth),
     onChange: (cb) => onAuthStateChanged(auth, cb)
   };
@@ -750,7 +767,9 @@ function setSignedIn(user){
   document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
   document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
   document.getElementById('signOutBtn').addEventListener('click', ()=>window.FBAuth.signOut());
-  document.getElementById('googleBtn').addEventListener('click', ()=>window.FBAuth.signIn());
+  document.getElementById('googleBtn').addEventListener('click', ()=>{
+    window.FBAuth.signIn().catch(e=>{ console.error('sign-in failed', e); showError('Sign-in failed: '+(e.code||e.message)); });
+  });
   try{
     // Firebase is set up in a deferred <script type="module">, so window.FB /
     // window.FBAuth may not exist yet. Wait for the module to publish them.
