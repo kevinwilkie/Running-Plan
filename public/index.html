@@ -493,7 +493,7 @@ function runRow(w, r, i){
   for(let k=0;k<n;k++){
     const lbl = (r.race && k===n-1) ? 'Last' : (k+1);
     const gpCls = (gpStart>=0 && k>=gpStart) ? ' gp' : '';
-    splitsHtml += `<label class="split${gpCls}"><span>Mi ${lbl}</span><input type="text" inputmode="numeric" data-split="${id}" data-mi="${k}" value="${esc(sp[k])}" placeholder="–:––" aria-label="Mile ${k+1} pace"></label>`;
+    splitsHtml += `<label class="split${gpCls}"><span>Mi ${lbl}</span><input type="text" inputmode="numeric" data-split="${id}" data-mi="${k}" value="${esc(fmtPace(sp[k]))}" placeholder="–:––" aria-label="Mile ${k+1} pace"></label>`;
   }
   return `
     <div class="run${kind}${done}" data-row="${id}">
@@ -615,17 +615,26 @@ function render(){
   host.querySelectorAll('input[data-split]').forEach(inp=>{
     inp.addEventListener('input',()=>{
       const id = inp.dataset.split, k = inp.dataset.mi;
+      const f = fmtPace(inp.value);        // auto-insert the colon: 1019 -> 10:19
+      if(inp.value !== f) inp.value = f;
       log[id] = log[id]||{};
       log[id].splits = log[id].splits||{};
-      log[id].splits[k] = inp.value;
+      log[id].splits[k] = f;
       saveItem(id); refreshWeekOf(inp);
     });
   });
   updateStats();
 }
 
+// Normalize a pace entry to M:SS from raw digits (or an already-colon'd value),
+// so the numeric keypad (no colon key) still produces a readable time.
+// "1019" -> "10:19", "945" -> "9:45", "9:45" -> "9:45", "" -> "".
+function fmtPace(v){
+  const d = String(v==null?'':v).replace(/\D/g,'').slice(0,4);
+  return d.length >= 3 ? d.slice(0, d.length-2)+':'+d.slice(d.length-2) : d;
+}
 function paceToSec(s){
-  const m = String(s||'').trim().match(/^(\d{1,2}):([0-5]?\d)$/);
+  const m = fmtPace(s).match(/^(\d{1,2}):([0-5]\d)$/);
   return m ? (+m[1])*60 + (+m[2]) : null;
 }
 function secToPace(sec){
@@ -757,7 +766,7 @@ function applyRemote(){
     row.querySelectorAll('input[data-split]').forEach(inp=>{
       const k = inp.dataset.mi;
       const v = (st.splits && st.splits[k]!=null) ? st.splits[k] : '';
-      if(document.activeElement!==inp) inp.value = v;
+      if(document.activeElement!==inp) inp.value = fmtPace(v);
     });
     const ni = row.querySelector('input[data-note]');
     if(ni && document.activeElement!==ni) ni.value = (st.note!=null ? st.note : '');
