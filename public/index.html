@@ -840,6 +840,15 @@ function setSignedIn(user){
     await window.FBReady;   // settles any pending Google redirect result
     if(window.FBAuthError) showError('Sign-in error: '+(window.FBAuthError.code||window.FBAuthError.message));
     window.FBAuth.onChange(user=>{
+      // A signed-in Google account always has a verified email. Anything without
+      // one is a stale anonymous session from an earlier version — clear it so the
+      // Google sign-in gate shows instead of a permission-denied loop.
+      if(user && !(user.email && user.emailVerified)){
+        unsubscribeLog();
+        setSignedIn(null);
+        window.FBAuth.signOut();
+        return;
+      }
       setSignedIn(user);
       if(user) subscribeLog(); else unsubscribeLog();
     });
